@@ -257,7 +257,9 @@ func (m *mock) compare(isRegexp bool, expect, cmd interface{}) error {
 
 // using map in command leads to disorder, change the command parameter to map[string]interface{}
 // for example:
+//
 //	[mset key1 value1 key2 value2] => [mset map[string]interface{}{"key1": "value1", "key2": "value2"}]
+//
 // return bool, is it handled
 func (m *mock) mapArgs(cmd string, cmdArgs *[]interface{}) bool {
 	var cut int
@@ -471,11 +473,42 @@ func (m *mock) ExpectExists(keys ...string) *ExpectedInt {
 	return e
 }
 
-func (m *mock) ExpectExpire(key string, expiration time.Duration) *ExpectedBool {
+func (m *mock) expectExpire(eType string, key string, expiration time.Duration) *ExpectedBool {
+	expire := m.factory.Expire
+	switch eType {
+	case "LT":
+		expire = m.factory.ExpireLT
+	case "GT":
+		expire = m.factory.ExpireGT
+	case "NX":
+		expire = m.factory.ExpireNX
+	case "XX":
+		expire = m.factory.ExpireXX
+	}
 	e := &ExpectedBool{}
-	e.cmd = m.factory.Expire(m.ctx, key, expiration)
+	e.cmd = expire(m.ctx, key, expiration)
 	m.pushExpect(e)
 	return e
+}
+
+func (m *mock) ExpectExpire(key string, expiration time.Duration) *ExpectedBool {
+	return m.expectExpire("", key, expiration)
+}
+
+func (m *mock) ExpectExpireLT(key string, expiration time.Duration) *ExpectedBool {
+	return m.expectExpire("LT", key, expiration)
+}
+
+func (m *mock) ExpectExpireGT(key string, expiration time.Duration) *ExpectedBool {
+	return m.expectExpire("GT", key, expiration)
+}
+
+func (m *mock) ExpectExpireNX(key string, expiration time.Duration) *ExpectedBool {
+	return m.expectExpire("NX", key, expiration)
+}
+
+func (m *mock) ExpectExpireXX(key string, expiration time.Duration) *ExpectedBool {
+	return m.expectExpire("XX", key, expiration)
 }
 
 func (m *mock) ExpectExpireAt(key string, tm time.Time) *ExpectedBool {
@@ -656,6 +689,13 @@ func (m *mock) ExpectDecrBy(key string, decrement int64) *ExpectedInt {
 func (m *mock) ExpectGet(key string) *ExpectedString {
 	e := &ExpectedString{}
 	e.cmd = m.factory.Get(m.ctx, key)
+	m.pushExpect(e)
+	return e
+}
+
+func (m *mock) ExpectGetDel(key string) *ExpectedString {
+	e := &ExpectedString{}
+	e.cmd = m.factory.GetDel(m.ctx, key)
 	m.pushExpect(e)
 	return e
 }

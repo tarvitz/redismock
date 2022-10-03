@@ -37,6 +37,10 @@ type baseMock interface {
 	ExpectDump(key string) *ExpectedString
 	ExpectExists(keys ...string) *ExpectedInt
 	ExpectExpire(key string, expiration time.Duration) *ExpectedBool
+	ExpectExpireLT(key string, expiration time.Duration) *ExpectedBool
+	ExpectExpireGT(key string, expiration time.Duration) *ExpectedBool
+	ExpectExpireNX(key string, expiration time.Duration) *ExpectedBool
+	ExpectExpireXX(key string, expiration time.Duration) *ExpectedBool
 	ExpectExpireAt(key string, tm time.Time) *ExpectedBool
 	ExpectKeys(pattern string) *ExpectedStringSlice
 	ExpectMigrate(host, port, key string, db int, timeout time.Duration) *ExpectedStatus
@@ -63,6 +67,7 @@ type baseMock interface {
 	ExpectDecr(key string) *ExpectedInt
 	ExpectDecrBy(key string, decrement int64) *ExpectedInt
 	ExpectGet(key string) *ExpectedString
+	ExpectGetDel(key string) *ExpectedString
 	ExpectGetRange(key string, start, end int64) *ExpectedString
 	ExpectGetSet(key string, value interface{}) *ExpectedString
 	ExpectIncr(key string) *ExpectedInt
